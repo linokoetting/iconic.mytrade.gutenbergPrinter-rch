@@ -1,0 +1,290 @@
+package iconic.mytrade.gutenbergPrinter.smtk;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.GregorianCalendar;
+import java.util.StringTokenizer;
+
+import iconic.mytrade.gutenberg.jpos.printer.service.LastTicket;
+import iconic.mytrade.gutenberg.jpos.printer.service.PosApp;
+import iconic.mytrade.gutenberg.jpos.printer.service.R3define;
+import iconic.mytrade.gutenberg.jpos.printer.service.SmartTicket;
+import iconic.mytrade.gutenberg.jpos.printer.service.properties.PrinterType;
+import iconic.mytrade.gutenberg.jpos.printer.service.properties.SRTPrinterExtension;
+import iconic.mytrade.gutenberg.jpos.printer.smtk.Base64;
+import iconic.mytrade.gutenberg.jpos.printer.srt.DummyServerRT;
+import iconic.mytrade.gutenberg.jpos.printer.srt.Xml4SRT;
+import iconic.mytrade.gutenberg.jpos.printer.utils.Files;
+import iconic.mytrade.gutenberg.jpos.printer.utils.RunShellScriptPoli20;
+import iconic.mytrade.gutenberg.jpos.printer.utils.Sprint;
+import iconic.mytrade.gutenbergPrinter.PrinterCommands;
+import iconic.mytrade.gutenbergPrinter.SharedPrinterFields;
+import jpos.FiscalPrinterConst;
+import jpos.JposException;
+
+public class SMTKCommands extends PrinterCommands {
+
+	public static void Base64_Ticket(int transactionnumber, boolean voiding) throws JposException
+	{
+		if (!SmartTicket.isBase64_Ticket())
+			return;
+		
+    	String[] date = new String[1];
+    	getDate(date);
+    	
+		if (SRTPrinterExtension.isPRT()) {
+			if (voiding)
+			{
+	        	// per i postVoid non abbiamo i dati per costruire il lastticket
+	        	
+				ArrayList<String> ticket = null;
+				ticket = fiscalPrinterDriver.getReceiptFromEj();
+				
+				initTicketOnFile();
+		    	for (int i=0; i<ticket.size(); i++)
+		    		scriviLastTicket(ticket.get(i));
+			}
+		}
+    	
+		if (SRTPrinterExtension.isSRT()) {
+			// il file LastTicket.out viene già fatto normalmente
+		}
+		
+		String toEncode = SharedPrinterFields.lastticket;
+		String Encoded = rtsTrxBuilder.storerecallticket.Default.getsourcePath()+"LastTicket.b64";
+		String Decoded = "";
+		if ((SmartTicket.getBase64_Decode() != null) && (SmartTicket.getBase64_Decode().length() > 0))
+			Decoded = SmartTicket.getBase64_Decode()+"/"+SharedPrinterFields.lastticket.substring(SharedPrinterFields.lastticket.lastIndexOf("/")+1);
+		try {
+			Base64.Encode(toEncode, Encoded, Decoded);
+		} catch (IOException e) {
+			System.out.println("Base64 encoding error : "+e.getMessage());
+		}
+		
+    	moveBase64Ticket(Encoded, date[0].substring(0, 2), transactionnumber, "b64", Integer.parseInt(DummyServerRT.CurrentReceiptNumber), voiding);
+	}
+
+	public static void Smart_Ticket(int transactionnumber, boolean voiding) throws JposException
+	{
+		if (!(SmartTicket.isSmart_Ticket() && SmartTicket.Smart_Ticket_Mode.equalsIgnoreCase(SmartTicket.ERECEIPT_URL_SERVER_PULL) && (SmartTicket.Smart_Ticket_ReceiptMode != SmartTicket.ERECEIPT_PAPER)))
+			return;
+		
+		String key = "ipserver"+PosApp.getStoreCode()+PosApp.getTillNumber()+transactionnumber;	// TEMPORANEO ipserver dovrà contenere l'ip address del server smart ticket preso da qualche tabella
+		
+		if (SRTPrinterExtension.isPRT() && fiscalPrinterDriver.isfwSMTKenabled())
+		{
+	    	String[] date = new String[1];
+	    	getDate(date);
+	    	
+	    	if (DummyServerRT.CurrentFiscalClosure == 0) {
+    	        int[] ai = new int[1];
+    	        String[] as = new String[1];
+                fiscalPrinterDriver.getData(FiscalPrinterConst.FPTR_GD_Z_REPORT, ai, as);
+                DummyServerRT.CurrentFiscalClosure = Integer.parseInt(as[0])+1;
+	    	}
+	    	
+	        String textfile = "";
+	        
+	        if (voiding)
+	        {
+	        	// per i postVoid non abbiamo i dati per costruire il lastticket
+	        	
+				ArrayList<String> ticket = null;
+				ticket = fiscalPrinterDriver.getReceiptFromEj();
+				
+		        for(int i = 0; i < ticket.size(); i++)
+		        	textfile = (new StringBuilder(String.valueOf(textfile))).append((String)ticket.get(i)).toString();
+	        }
+	        else
+	        {
+				try {
+			        BufferedReader in = new BufferedReader(new FileReader(SharedPrinterFields.lastticket));
+			        String line;
+			        StringBuilder sb = new StringBuilder();
+			        while ((line = in.readLine()) != null) {
+			        	sb.append(line+R3define.Lf);
+			        }
+			        in.close();
+			        textfile = sb.toString();
+				} catch (Exception e) {
+					System.out.println("Smart_Ticket error : "+e.getMessage());
+				}
+	        }
+	        
+	    	System.out.println("SMTK - data="+date[0]);
+	    	System.out.println("SMTK - CurrentFiscalClosure="+DummyServerRT.CurrentFiscalClosure);
+	    	System.out.println("SMTK - CurrentReceiptNumber="+DummyServerRT.CurrentReceiptNumber);
+	    	System.out.println("SMTK - RTPrinterId="+SharedPrinterFields.RTPrinterId);
+	    	System.out.println("SMTK - PrinterIpAdd="+SharedPrinterFields.Printer_IPAddress);
+	    	System.out.println("SMTK - TransactionNumber="+transactionnumber);
+	    	System.out.println("SMTK - voiding="+voiding);
+	    	
+	    	if (fiscalPrinterDriver.SMTKgetStatusReceipt(DummyServerRT.CurrentFiscalClosure, DummyServerRT.CurrentReceiptNumber, date[0].substring(0, 4)+date[0].substring(6, 8)))
+	    	{
+	    	}
+		}
+		
+		if (SRTPrinterExtension.isSRT())
+		{
+			// il file LastTicket.out viene già fatto normalmente
+			
+			String textfile = "";
+			try {
+		        BufferedReader in = new BufferedReader(new FileReader(SharedPrinterFields.lastticket));
+		        String line;
+		        StringBuilder sb = new StringBuilder();
+		        while ((line = in.readLine()) != null) {
+		        	sb.append(line+R3define.Lf);
+		        }
+		        in.close();
+		        textfile = sb.toString();
+			} catch (Exception e) {
+				System.out.println("Smart_Ticket error : "+e.getMessage());
+			}
+	        
+			String toEncode = SharedPrinterFields.lastticket;
+			String Encoded = rtsTrxBuilder.storerecallticket.Default.getsourcePath()+"LastTicket.b64";
+			String Decoded = "";
+			if ((SmartTicket.getBase64_Decode() != null) && (SmartTicket.getBase64_Decode().length() > 0))
+				Decoded = SmartTicket.getBase64_Decode()+"/"+SharedPrinterFields.lastticket.substring(SharedPrinterFields.lastticket.lastIndexOf("/")+1);
+			try {
+				Base64.Encode(toEncode, Encoded, Decoded);
+			} catch (IOException e) {
+				System.out.println("Base64 encoding error : "+e.getMessage());
+			}
+	    	moveSmartTicket(Encoded, DummyServerRT.getCurrent_dateTime().substring(6, 8), transactionnumber, "b64", Integer.parseInt(DummyServerRT.CurrentReceiptNumber), voiding);
+	    	
+	    	String XmlFilename = rtsTrxBuilder.storerecallticket.Default.getsourcePath()+"LastTicket.xml";
+	    	Xml4SRT.runXmlCoder(XmlFilename, "", SRTPrinterExtension.isPRT(), DummyServerRT.SRTServerID, DummyServerRT.CurrentFiscalClosure, Integer.parseInt(DummyServerRT.CurrentReceiptNumber), DummyServerRT.getCurrent_dateTime(), smtkamount, SmartTicket.smtkbarcodes, SmartTicket.Smart_Ticket_CustomerType, SmartTicket.Smart_Ticket_CustomerId, true, false, true);
+	    	Xml4SRT.runXmlUpdater(XmlFilename, textfile, true, false, true, key, false);
+	    	moveSmartTicket(XmlFilename, DummyServerRT.getCurrent_dateTime().substring(6, 8), transactionnumber, "xml", Integer.parseInt(DummyServerRT.CurrentReceiptNumber), voiding);
+
+/*			questo pezzo non serve più perchè il file pdf se lo costruisce il server partendo dal b64 che gli mandiamo, creato partendo dal file LastTicket.out
+
+	    	String PdfFilename = rtsTrxBuilder.storerecallticket.Default.getsourcePath()+"LastTicket.pdf";
+	    	String XmlFilename = rtsTrxBuilder.storerecallticket.Default.getsourcePath()+"LastTicket.xml";
+	    	String ret = runPdfCoder(lastticket, PdfFilename);
+	    	if ((ret == null) || (ret.length() == 0)) {
+		    	System.out.println("SMTK - runPdfCoder failed.");
+	    	}
+	    	else {
+		    	xml4srt.runXmlCoder(XmlFilename, "", RTPrinterId, CurrentFiscalClosure, Integer.parseInt(CurrentReceiptNumber), getCurrent_dateTime(), smtkamount, smtkbarcodes, SMTKgetCustomerType(), SMTKgetCustomerId(), true);
+		    	moveSmartTicket(PdfFilename, getCurrent_dateTime().substring(6, 8), transactionnumber, "pdf", Integer.parseInt(CurrentReceiptNumber), voiding);
+		    	moveSmartTicket(XmlFilename, getCurrent_dateTime().substring(6, 8), transactionnumber, "xml", Integer.parseInt(CurrentReceiptNumber), voiding);
+	    	}*/
+		}
+		
+    	SmartTicket.SMTKrestoreDefault();
+	}
+	
+	public static String SMTKdownload(String url)
+	{
+		String ret = "";
+		
+		if (fiscalPrinterDriver.isfwSMTKdisabled())
+			return ret;
+		
+		return ret;
+	}
+	
+	private static void moveBase64Ticket(String sourcefile, String subfolder, int transactionnumber, String extension, int receiptnumber, boolean voiding)
+	{
+		moveSmartTicket(sourcefile, subfolder, transactionnumber, extension, receiptnumber, voiding);
+	}
+	
+	private static void moveSmartTicket(String sourcefile, String subfolder, int transactionnumber, String extension, int receiptnumber, boolean voiding)
+	{
+		boolean ret = true;
+		
+		boolean clean = receiptnumber == 1;
+		
+		File f = new File(SmartTicket.ERECEIPT_DESTIN_FOLDER);
+		if (!f.exists()) {
+			System.out.println("SMTK - moveSmartTicket - creating: "+SmartTicket.ERECEIPT_DESTIN_FOLDER);	   
+			ret = f.mkdirs();
+			if (!ret)
+				System.out.println("SMTK - moveSmartTicket - ret: "+ret);	   
+		}
+		if (!ret)
+			return;
+		
+		String destinationfolder = SmartTicket.ERECEIPT_DESTIN_FOLDER + subfolder;
+		f = new File(destinationfolder);
+		if (!f.exists()) {
+			System.out.println("SMTK - moveSmartTicket - creating: "+destinationfolder);	   
+			ret = f.mkdirs();
+			if (!ret)
+				System.out.println("SMTK - moveSmartTicket - ret: "+ret);	   
+		}
+		if (ret) {
+			if (clean) {
+				String oldfiles = destinationfolder + "/" + "*." + extension;
+				Files.removeFiles(oldfiles);
+				if (extension.equalsIgnoreCase("pdf")) {
+					oldfiles = oldfiles + "64";
+					Files.removeFiles(oldfiles);
+				}
+			}
+			
+			String destfile = destinationfolder + "/" + transactionnumber + "." + extension;
+			if (voiding)
+				destfile = destinationfolder + "/" + transactionnumber + ".voided." + extension;
+			Files.moveFile(sourcefile, destfile);
+			
+			if (extension.equalsIgnoreCase("pdf")) {
+				// i pdf li inviamo convertiti in base64
+				
+				String toEncode = destfile;
+				String Encoded = toEncode + "64";
+				String Decoded = "";
+				if ((SmartTicket.getBase64_Decode() != null) && (SmartTicket.getBase64_Decode().length() > 0))
+					Decoded = SmartTicket.getBase64_Decode()+"/"+"LastTicket.pdf";
+				try {
+					Base64.Encode(toEncode, Encoded, Decoded);
+				} catch (IOException e) {
+					System.out.println("Base64 encoding error : "+e.getMessage());
+				}
+			}
+		}
+	}
+	
+	private static String buildPdfPath(String ip, String date)
+	{
+		String path = "";
+		
+		return path;
+	}
+	
+	private static String buildPdfFilename(String path, int zrep, String nrec)
+	{
+		String filename = "";
+		
+		return filename;
+	}
+	
+	private static String buildXmlFilename(String pdffilename)
+	{
+		String filename = "";
+		
+		filename = pdffilename.substring(0, pdffilename.lastIndexOf(".")) + "-ESITO-OK.xml";
+		
+		return filename;
+	}
+	
+	public static void SMTKsetVoidReceiptType()
+	{
+	    if (SmartTicket.isSmart_Ticket())
+	    {
+	    	if (SRTPrinterExtension.isPRT()) {
+	    		// qui setto i parametri per lo scontrino che sta per andare in stampa, secondo le impostazioni decise dall'interfaccia grafica
+	    		// oppure con le impostazioni di default se non sono state specificate tramite l'interfaccia grafica
+	    		fiscalPrinterDriver.SMTKsetReceiptType(SmartTicket.Smart_Ticket_ReceiptMode, SmartTicket.Smart_Ticket_Validity);
+	    	}
+	    	
+	    	SmartTicket.SMTKbarcodes_reset();
+	    }
+	}
+}
