@@ -1362,6 +1362,14 @@ public class GuiFiscalPrinterDriver extends FiscalPrinterDriver implements jpos.
 		arg2[0]=arg2[0]+"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
 	}
 
+	public void directIO(int arg0, int[] arg1, Object arg2) throws JposException {
+		if(PrinterGUI.isWindowOpen(PrinterGUI.getFrame()) == false) {
+			PrinterGUI.createWindow();			
+		}
+		
+		PrinterGUI.addText("-- directIO --"+arg0+"--"+arg1[0]+"--"+arg2.toString());
+	}
+	
 	public String getCheckHealthText() throws JposException {
 		// TODO Auto-generated method stub
 		return null;
