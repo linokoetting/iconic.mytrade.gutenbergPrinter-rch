@@ -891,7 +891,7 @@ public class GuiFiscalPrinterDriver extends FiscalPrinterDriver implements jpos.
 		
 		PrinterGUI.addText("-- getData --"+arg0);
 		
-		arg2[0] = "001";
+		arg2[0] = "002";
 	}
 
 	public void getDate(String[] arg0) throws JposException {
@@ -1003,7 +1003,7 @@ public class GuiFiscalPrinterDriver extends FiscalPrinterDriver implements jpos.
 		}
 		
 		PrinterGUI.addText("-- getPrinterState --");	
-		return 0;
+		return 9;
 	}
 
 	public int getQuantityDecimalPlaces() throws JposException {
