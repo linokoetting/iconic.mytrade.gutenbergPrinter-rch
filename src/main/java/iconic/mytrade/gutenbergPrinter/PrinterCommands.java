@@ -78,7 +78,7 @@ import rtsTrxBuilder.support.scontiSEMPLICI;
 
 public class PrinterCommands extends iconic.mytrade.gutenbergInterface.PrinterCommands {
 	
-	private static int MyPrinterType = PrinterType.RCHPRINTF_F;
+	private static int MyPrinterType = PrinterType.RCHPRINTF_F;		// oppure leggerlo dalla versione nel pom ?
 	
 	private static double fw = 0;
 	
@@ -2922,6 +2922,9 @@ public class PrinterCommands extends iconic.mytrade.gutenbergInterface.PrinterCo
 			String	sd;
 			
 			ArrayList HH = TicketErrorSupport.getHD();
+			if (HH == null)
+				return ( false );
+			
 			for ( i = 0; i < 2 ; i++ )
 			{
 				sd = " ";
