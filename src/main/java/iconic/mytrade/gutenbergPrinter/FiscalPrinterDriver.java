@@ -2201,7 +2201,8 @@ public class FiscalPrinterDriver implements jpos.FiscalPrinterControl17, StatusU
 	{
 		if ((i == FPRT_RT_POSTVOID_NUMBER) || (i == FPRT_RT_REFUND_NUMBER))
 		{
-			GetDailyData(i);
+			double ret = GetDailyData(i);
+			as[0] = Sprint.f("%010d", ret*100);
 			return;
 		}
 		
@@ -2357,9 +2358,9 @@ public class FiscalPrinterDriver implements jpos.FiscalPrinterControl17, StatusU
         } 
     }
 	
-	private void GetDailyData(int i) {
+	private double GetDailyData(int i) {
 		if (isNotRTModel())
-			return;
+			return 0;
 		
 		double ret = 0;
 		
@@ -2369,6 +2370,8 @@ public class FiscalPrinterDriver implements jpos.FiscalPrinterControl17, StatusU
 		else if (i == FPRT_RT_REFUND_NUMBER) {
 			ret = getDailyRefund();
 		}
+		
+		return ret;
 	}
 	
 	private double getDailyVoid() {
@@ -2416,7 +2419,7 @@ public class FiscalPrinterDriver implements jpos.FiscalPrinterControl17, StatusU
 	private double getDailyRefund() {
         FiscalPrinterDataInformation.setNewDataAvailable(false);
         
-		double ret = -1;
+		double ret = 0;
 		
 		StringBuffer key = new StringBuffer(SharedPrinterFields.KEY_X);
 		this.executeRTDirectIo(0, 0, key);
