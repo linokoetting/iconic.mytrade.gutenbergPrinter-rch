@@ -13,8 +13,8 @@ import java.util.StringTokenizer;
 
 import iconic.mytrade.gutenberg.jpos.printer.service.Beeping;
 import iconic.mytrade.gutenberg.jpos.printer.service.FiscalPrinterDataInformation;
-import iconic.mytrade.gutenberg.jpos.printer.service.MessageBox;
-import iconic.mytrade.gutenberg.jpos.printer.service.PleaseDisplay;
+import iconic.mytrade.gutenberg.jpos.printer.service.OperatorDisplay.MessageBox;
+import iconic.mytrade.gutenberg.jpos.printer.service.OperatorDisplay.OperatorDisplay;
 import iconic.mytrade.gutenberg.jpos.printer.service.PrinterInfo;
 import iconic.mytrade.gutenberg.jpos.printer.service.R3define;
 import iconic.mytrade.gutenberg.jpos.printer.service.SmartTicket;
@@ -254,7 +254,7 @@ public class FiscalPrinterDriver implements jpos.FiscalPrinterControl17, StatusU
 			System.out.println ( "Printer Exception <"+e.toString()+">");
 			return fw;
 		}
-		PleaseDisplay.pleaseDisplay ( " VERIFICA STAMPANTE ");
+		OperatorDisplay.pleaseDisplay ( " VERIFICA STAMPANTE ");
 		System.out.println ("FP-1");
 	    while ( true ) 
 	    {
@@ -271,7 +271,7 @@ public class FiscalPrinterDriver implements jpos.FiscalPrinterControl17, StatusU
 	    	System.out.println ("FP-6");
 	    }
 		System.out.println ("FP-7");
-		PleaseDisplay.pleaseDisplay ( "  STAMPANTE PRONTA  " );
+		OperatorDisplay.pleaseDisplay ( "  STAMPANTE PRONTA  " );
 		
 	    SharedPrinterFields.fiscalEJ = new FiscalEJFile ();
 	    SharedPrinterFields.fiscalEJ.open("uk.co.datafit.wincor.system.device.FiscalEJFile", null);
@@ -291,7 +291,7 @@ public class FiscalPrinterDriver implements jpos.FiscalPrinterControl17, StatusU
 	    		if (rtstatus  < RT_OK){
 //	    			if (isEpsonModel() && (rtstatus == RT_OLDFILESTOSEND))	// avanti lo stesso
 //	    				break;
-	    			PleaseDisplay.pleaseDisplay ( PRINTERRTOFF );
+	    			OperatorDisplay.pleaseDisplay ( PRINTERRTOFF );
 	    		}
 	    		else
 	    			break;
@@ -330,7 +330,7 @@ public class FiscalPrinterDriver implements jpos.FiscalPrinterControl17, StatusU
 					System.out.println ( "Printer Exception <"+e1.toString()+">");
 				}
 	    		if (SharedPrinterFields.RTPrinterId == null){
-	    			PleaseDisplay.pleaseDisplay ( PRINTERRTOFF );
+	    			OperatorDisplay.pleaseDisplay ( PRINTERRTOFF );
 	    		}
 	    		else {
 	    			PrinterInfo.SavePrinterInfo("PrinterId", SharedPrinterFields.RTPrinterId);
@@ -2570,7 +2570,7 @@ public class FiscalPrinterDriver implements jpos.FiscalPrinterControl17, StatusU
 	
 	   private void reprintLastTicket()
 	   {
-		   PleaseDisplay.pleaseDisplay("Attendere Prego...");
+		   OperatorDisplay.pleaseDisplay("Attendere Prego...");
 		   
 		   try {
 			   fiscalPrinter.printDuplicateReceipt();
