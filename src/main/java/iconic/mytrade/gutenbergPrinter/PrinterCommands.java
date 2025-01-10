@@ -45,6 +45,7 @@ import iconic.mytrade.gutenberg.jpos.printer.service.TransactionSale;
 import iconic.mytrade.gutenberg.jpos.printer.service.TxnHeader;
 import iconic.mytrade.gutenberg.jpos.printer.service.hardTotals.HardTotals;
 import iconic.mytrade.gutenberg.jpos.printer.service.properties.Lotteria;
+import iconic.mytrade.gutenberg.jpos.printer.service.properties.MyTradeProperties;
 import iconic.mytrade.gutenberg.jpos.printer.service.properties.PaperSavingProperties;
 import iconic.mytrade.gutenberg.jpos.printer.service.properties.PrinterType;
 import iconic.mytrade.gutenberg.jpos.printer.service.properties.SRTPrinterExtension;
@@ -1408,6 +1409,8 @@ public class PrinterCommands extends iconic.mytrade.gutenbergInterface.PrinterCo
 		SSCO = RoungickTax.getVatTable(true);				
 		if (SSCO != null)
 		{
+			double valueVI = 0;
+			
 			for (int index=0; index < SSCO.size(); index++)
 			{
 				VatInOutHandling vatInOutH = (VatInOutHandling) SSCO.get(index);
@@ -1421,14 +1424,32 @@ public class PrinterCommands extends iconic.mytrade.gutenbergInterface.PrinterCo
 					String myDiscountAmount = ""+(int)(Math.rint(value*100));
 					String myDiscountDescription = "Sconto IVA";
 					
-					StringBuffer sbcmd = new StringBuffer("=U/*"+myDepartment+"/$"+myDiscountAmount+"/("+myDiscountDescription+")");
-					System.out.println("printScontiByTax - sbcmd="+sbcmd);
-					fiscalPrinterDriver.executeRTDirectIo(0, 0, sbcmd);
+					if (MyTradeProperties.isMergeVatDiscount() && MixedVat(myDepartment)) {
+						valueVI+=value;
+					}
+					else {
+						StringBuffer sbcmd = new StringBuffer("=U/*"+myDepartment+"/$"+myDiscountAmount+"/("+myDiscountDescription+")");
+						System.out.println("printScontiByTax - sbcmd="+sbcmd);
+						fiscalPrinterDriver.executeRTDirectIo(0, 0, sbcmd);
+					}
 					
 			        String out = buildSubtotalAdjustment ( myDiscountDescription.substring(7)+" "+vatInOutH.getRate()+"%", (long)(Math.rint(value*100) * 100) );
 			        scriviLastTicket(out);
 				}
 			}
+			
+			if (valueVI > 0.00) {
+				// faccio un unico sconto sul totale contenente la somma degli sconti sulle varie aliquote VI
+				String myDiscountAmount = ""+(int)(Math.rint(valueVI*100));
+				
+				StringBuffer sbcmd = new StringBuffer("=S");
+				System.out.println("printScontiByTax - sbcmd="+sbcmd);
+				fiscalPrinterDriver.executeRTDirectIo(0, 0, sbcmd);
+				sbcmd = new StringBuffer("=V/*"+myDiscountAmount);
+				System.out.println("printScontiByTax - sbcmd="+sbcmd);
+				fiscalPrinterDriver.executeRTDirectIo(0, 0, sbcmd);
+			}
+			
 		}
 		else
 			System.out.println("printScontiByTax - SSCO is null");
@@ -4507,4 +4528,20 @@ public class PrinterCommands extends iconic.mytrade.gutenbergInterface.PrinterCo
 			}
 		}
 
+		private boolean MixedVat(String vat)
+		{
+			// controlla se siamo in regime di Iva Ventilata
+			
+			//System.out.println("MixedVat - vat = " + vat);
+			
+			boolean ret = false;
+			
+			int rtcode = Integer.parseInt(vat);
+			if (rtcode >= 15 && rtcode <= 23)
+				ret = true;
+			
+			//System.out.println("MixedVat - ret = " + ret);
+			return ret;
+		}
+		
 }
