@@ -43,7 +43,7 @@ import iconic.mytrade.gutenberg.jpos.printer.service.TakeYourTime;
 import iconic.mytrade.gutenberg.jpos.printer.service.TicketErrorSupport;
 import iconic.mytrade.gutenberg.jpos.printer.service.TransactionSale;
 import iconic.mytrade.gutenberg.jpos.printer.service.TxnHeader;
-import iconic.mytrade.gutenberg.jpos.printer.service.hardTotals.HardTotals;
+import rtsTrxBuilder.hardTotals.HardTotals;
 import iconic.mytrade.gutenberg.jpos.printer.service.properties.Lotteria;
 import iconic.mytrade.gutenberg.jpos.printer.service.properties.MyTradeProperties;
 import iconic.mytrade.gutenberg.jpos.printer.service.properties.PaperSavingProperties;
