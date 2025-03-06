@@ -2540,7 +2540,7 @@ public class FiscalPrinterDriver implements jpos.FiscalPrinterControl17, StatusU
 		return PrinterCommands.checkCurrentDailyTotalRounded(In, rounding);
 	}
 	
-	   private void reprintLastTicket()
+	   void reprintLastTicket()
 	   {
 		   OperatorDisplay.pleaseDisplay("Attendere Prego...");
 		   
