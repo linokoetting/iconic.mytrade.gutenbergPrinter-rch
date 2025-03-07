@@ -26,6 +26,7 @@ import iconic.mytrade.gutenberg.jpos.printer.service.properties.SRTPrinterExtens
 import iconic.mytrade.gutenberg.jpos.printer.service.properties.SmartTicketProperties;
 import iconic.mytrade.gutenberg.jpos.printer.utils.Sprint;
 import iconic.mytrade.gutenberg.jpos.printer.utils.String13Fix;
+import iconic.mytrade.gutenbergPrinter.FiscalPrinterDriver.DirectIOListener;
 import iconic.mytrade.gutenbergPrinter.ej.FiscalEJFile;
 import iconic.mytrade.gutenbergPrinter.tax.DicoTaxLoad;
 import iconic.mytrade.gutenbergPrinter.tax.DicoTaxObject;
@@ -1768,7 +1769,13 @@ public class FiscalPrinterDriver implements jpos.FiscalPrinterControl17, StatusU
 	}
 
 	public boolean getRecNearEnd() throws JposException {
+		if (!getCapRecNearEndSensor())
+			return false;
 		return fiscalPrinter.getRecNearEnd();
+	}
+
+	public boolean getSlipNearEnd() throws JposException {
+		return false;
 	}
 
 	public int getRemainingFiscalMemory() throws JposException {
@@ -2617,6 +2624,41 @@ public class FiscalPrinterDriver implements jpos.FiscalPrinterControl17, StatusU
 			
 		   key = new StringBuffer(SharedPrinterFields.KEY_REG);
 		   executeRTDirectIo(0, 0, key);
+	   }
+
+	   String checkEJStatus()
+	   {
+		   String reply = "";
+			   
+		   int cmdInt = 0;
+		   int[] mydata = {0};
+		   String cmd = "<</?g";
+		        
+		   DirectIOListener p=new DirectIOListener();
+		   fiscalPrinter.addDirectIOListener((jpos.events.DirectIOListener) p);
+			   
+		   try {
+			   p.started = true;
+			   p.buffer="";
+					
+			   fiscalPrinter.directIO(cmdInt, mydata, cmd);
+			   while (p.started) {
+				   try {
+					   Thread.sleep(500);
+				   } catch (InterruptedException e) {
+				   }
+			   }
+					
+			   System.out.println("checkEJStatus - result : "+p.buffer);
+			   reply = p.buffer;
+					
+		   } catch (JposException e) {
+			   System.out.println("checkEJStatus - Exception : " + e.getMessage());
+		   }
+		        
+		   fiscalPrinter.removeDirectIOListener(p);
+			   
+		   return reply;
 	   }
 
 }
