@@ -1483,4 +1483,8 @@ public class GuiFiscalPrinterDriver extends FiscalPrinterDriver implements jpos.
 	{
 	}
 	
+	public void bitmap(String filename,int width,int height,int align) //throws PrinterException
+	{
+	}
+	   
 }

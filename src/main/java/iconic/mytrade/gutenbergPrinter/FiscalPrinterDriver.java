@@ -1,7 +1,10 @@
 package iconic.mytrade.gutenbergPrinter;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -2658,4 +2661,8 @@ public class FiscalPrinterDriver implements jpos.FiscalPrinterControl17, StatusU
 		   return reply;
 	   }
 
+	   public void bitmap(String filename,int width,int height,int align) //throws PrinterException
+	   {
+	   }
+		   
 }
