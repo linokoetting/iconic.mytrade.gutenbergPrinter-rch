@@ -2871,7 +2871,6 @@ public class PrinterCommands extends iconic.mytrade.gutenbergInterface.PrinterCo
 		
 		private void AutoVoidTrx()
 		{
-			SharedPrinterFields.setMyReply(false);
 		}
 		
 		public static int  getPrinterState() throws JposException
