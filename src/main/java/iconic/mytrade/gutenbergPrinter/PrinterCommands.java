@@ -986,7 +986,7 @@ public class PrinterCommands extends iconic.mytrade.gutenbergInterface.PrinterCo
 				   		RTTxnType.setSaleTrx();
 						CanPost.setCanPost(true);
 	  	    			
-	  	    			while (true) {
+//	  	    			while (true) {
 	  						OperatorDisplay.pleaseDisplay(DummyServerRT.SERVEROFF);
 	  						try {
 								Thread.sleep(3000);
@@ -997,8 +997,8 @@ public class PrinterCommands extends iconic.mytrade.gutenbergInterface.PrinterCo
 								Thread.sleep(3000);
 							} catch (InterruptedException e) {
 							}
-	  	    			}
-	  	    			//return;
+//	  	    			}
+	  	    			return;
 					}
 //				}
 				
@@ -2871,6 +2871,7 @@ public class PrinterCommands extends iconic.mytrade.gutenbergInterface.PrinterCo
 		
 		private void AutoVoidTrx()
 		{
+			SharedPrinterFields.setMyReply(false);
 		}
 		
 		public static int  getPrinterState() throws JposException
