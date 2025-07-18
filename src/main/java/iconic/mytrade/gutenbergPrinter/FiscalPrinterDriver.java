@@ -345,11 +345,11 @@ public class FiscalPrinterDriver implements jpos.FiscalPrinterControl17, StatusU
 	    		System.out.println("checkRTStatus - ATTENZIONE --------------------------------------");
 	    		System.out.println("checkRTStatus - FORZATO REPORT Z");
 	    		System.out.println("checkRTStatus - ATTENZIONE --------------------------------------");
-//	    		try {
-//					fiscalPrinter.printZReport();
-//				} catch (JposException e) {
-//					System.out.println ( "Printer Exception <"+e.toString()+">");
-//				}
+	    		try {
+					fiscalPrinter.printZReport();
+				} catch (JposException e) {
+					System.out.println ( "Printer Exception <"+e.toString()+">");
+				}
 	    	}
 	    	
 			PrinterInfo.SavePrinterInfo("RT FW Build Number", fwBuildNumber);
