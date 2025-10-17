@@ -134,7 +134,7 @@ public class PrinterCommands extends iconic.mytrade.gutenbergInterface.PrinterCo
 	
 	static int staticMsgLen = 0;
 	
-	private static final String	LOGO_FOLDER	=	"/bs2coop/pos/image/header/";
+	private static final String	LOGO_FOLDER	=	"/image/header/";
 	static final String	LOGO_FILE			=	"MyLogo.bmp";
 	static final String	TRAILER_LOGO_FILE	=	"MyTrailerLogo.bmp";
 	static final int	LOGO_NUMBER			=	1;
@@ -2830,7 +2830,7 @@ public class PrinterCommands extends iconic.mytrade.gutenbergInterface.PrinterCo
 		{
 			System.out.println("SetLogo - setting logo: "+number+" - "+name);
 					
-			File filep = new File(LOGO_FOLDER+name);
+			File filep = new File(SharedPrinterFields.WorkingFolder+LOGO_FOLDER+name);
 			if (!filep.exists()){
 				System.out.println("SetLogo: "+filep.getAbsolutePath()+" doesn't exist");
 				return;
@@ -2839,7 +2839,7 @@ public class PrinterCommands extends iconic.mytrade.gutenbergInterface.PrinterCo
 			int cmdLoad = 1202;
 			int cmdSelect = 1204;
     		int[] configuration = new int[] {3};
-    		String[] path = new String[] {LOGO_FOLDER+name};
+    		String[] path = new String[] {SharedPrinterFields.WorkingFolder+LOGO_FOLDER+name};
     		int[] logo = new int[] {3};
     		
     		if (number == TRAILER_LOGO_NUMBER) {
