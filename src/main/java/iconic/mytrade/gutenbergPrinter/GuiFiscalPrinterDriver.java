@@ -1295,6 +1295,8 @@ public class GuiFiscalPrinterDriver extends FiscalPrinterDriver implements jpos.
 //		}
 //		
 //		PrinterGUI.addText("-- close --");	
+//	
+//		PrinterGUI.createOtherWindow();
 //	}
 //
 //	public void directIO(int arg0, int[] arg1, StringBuffer arg2) throws JposException {
