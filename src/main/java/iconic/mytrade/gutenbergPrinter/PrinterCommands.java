@@ -3525,6 +3525,17 @@ public class PrinterCommands extends iconic.mytrade.gutenbergInterface.PrinterCo
 			objb = new StringBuffer(bc);
 			fiscalPrinterDriver.executeRTDirectIo(5000, type, objb);
     		
+			if (SharedPrinterFields.isfiscalEJenabled() && !SharedPrinterFields.PosponedInError) {
+				try {
+					if (type == 8)
+						SharedPrinterFields.fiscalEJ.printBarcode(bc);
+					if (type == 11)
+						SharedPrinterFields.fiscalEJ.printQrcode(bc);
+				} catch (JposException e) {
+					   System.out.println("stampaBarcodePerResi - Exception : " + e.getMessage());
+				}
+			}
+    		
     		SmartTicket.SMTKbarcodes_add(bc);
 		}
 		
@@ -3555,6 +3566,17 @@ public class PrinterCommands extends iconic.mytrade.gutenbergInterface.PrinterCo
 				this.directIO(5000, dt, objb);
 			} catch (JposException e) {
 				System.out.println("stampaBarcodePerResi - Exception : " + e.getMessage());
+			}
+    		
+			if (SharedPrinterFields.isfiscalEJenabled() && !SharedPrinterFields.PosponedInError) {
+				try {
+					if (type == 8)
+						SharedPrinterFields.fiscalEJ.printBarcode(bc);
+					if (type == 11)
+						SharedPrinterFields.fiscalEJ.printQrcode(bc);
+				} catch (JposException e) {
+					   System.out.println("stampaBarcodePerResi - Exception : " + e.getMessage());
+				}
 			}
 		}
 
