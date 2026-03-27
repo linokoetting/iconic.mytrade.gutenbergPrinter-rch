@@ -170,6 +170,9 @@ public class SMTKCommands extends PrinterCommands {
 	{
 		boolean ret = true;
 		
+		if (extension.equalsIgnoreCase("pdf"))
+			sourcefile = SharedPrinterFields.WorkingFolder + "/" + sourcefile;
+		
 		boolean clean = receiptnumber == 1;
 		
 		File f = new File(SmartTicket.getERECEIPT_DESTIN_FOLDER());
